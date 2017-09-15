@@ -1,0 +1,146 @@
+Constant Story "My first Inform 6 game";
+Constant Headline "^A demo by Yoruk.^";
+
+Constant No_score;
+
+Global EnigmaSolved = false;
+
+#Include "Parser";
+#Include "VerbLib";
+
+[Initialise;
+print "^^This is a demo game written in Inform 6. Can you solve it ?^^";
+location = InitialRoom;
+move GoldKey to GoldenChest;
+];
+
+
+Include "Grammar";
+
+
+object InitialRoom "Initial Room"
+with
+description "You are alone in a strange room.",
+n_to TreasureRoom,
+s_to WoodenDoor,
+has light ;
+
+
+
+
+Object -> WoodenDoor "wooden door"
+with description "A big wooden door. It have a lock.", 
+name 'big' 'wooden' 'door' ,
+when_closed "You can see a big wooden door, on the south. The door is closed.",
+when_open "The door is now open.",
+door_to ExitRoom,
+door_dir s_to,
+with_key goldkey,
+has static door openable lockable locked ;
+
+
+
+object TreasureRoom "Treasure Room"
+with
+description "This room is quite the same as the previous one. You can go to the initial room by walking in the south. There is an other room on the east.",
+s_to InitialRoom,
+e_to DragonRoom,
+has light ;
+
+
+object DragonRoom "Dragon Room"
+with
+description "You can reach the Treasure room by walking on the west.",
+w_to TreasureRoom,
+has light ;
+
+
+
+
+
+
+object SilverChest "Silver Chest"
+with description "A beautiful silver chest.",
+name 'silver' 'chest',
+found_in TreasureRoom,
+
+before [;
+open : print "You open the Silver Chest. A bright light came from the inside. You immedialty feel bad." ;
+deadflag = 1;
+rtrue ; 
+],
+
+has static openable container;
+
+
+
+object GoldenChest "Golden Chest"
+with description "A beautiful Chest, made of Gold.",
+name 'gold' 'golden' 'chest',
+found_in TreasureRoom,
+
+before [;
+open : if (EnigmaSolved == false){
+print "You open the Golden Chest. A bright light came from the inside. You immedialty feel bad." ;
+deadflag = 1;
+rtrue ;
+} 
+],
+
+has static openable container ;
+
+
+
+
+
+
+
+object Goldkey "golden key"
+with description "A small golden key.",
+name 'small' 'key' 'golden',
+has female;
+
+
+
+
+object ExitRoom "Exit Room"
+with
+description [;
+print "You are free ! Congratulation, you solved this game !^^"; deadflag = 2; rtrue ; 
+], 
+has light ;
+
+
+
+
+
+Object dragon "dragon"
+with name 'red' 'dragon' 'animal',
+description "A red dragon is standing here. He doesn't stop looking at you.",
+initial "A red dragon is here.",
+found_in DragonRoom,
+life [ word1 word2;
+
+Tell : print "The dragon doesn't listen you.^"; rtrue;
+Attack : print "You should not. He can split fire.^"; rtrue ;
+Kiss : print "Hmm..no.^";rtrue;
+
+Answer , Ask :
+word1 = noun;
+word2 = second; 
+if (word1==33) {word1=word2;}
+
+switch (word1) { 
+'hi', 'hello' : "~Hello, stranger.~"; 
+'key', 'help' : "~The exit door is locked. To find the key, you must answer an enigma. If you are ready, I can sing it.~";
+'hi', 'hello' : "~Hello, stranger.~";
+'door', 'exit', 'lock': "~Hmmm. I can help you to find the key.~";
+'enigma', 'game' , 'song' : "~Here is the enigma : On the morning, it have four legs. At noon, it have two legs; on the night ; it have three. What is it ?~"; 
+'man', 'boy', 'girl', 'human', 'men', 'lady' : print "~You found the solution of the enigma. Congratulations ! The key is inside the golden Chest. Watch out, don't try to open the other one !~^"; EnigmaSolved = true; rtrue ;
+'solution' : "You must find the answer by yourself."; 
+default : print "No answer.^"; rtrue;
+}
+
+],
+has animate static ;
+
