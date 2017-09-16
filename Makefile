@@ -1,5 +1,5 @@
 all:
-	inform example.i6
+	inform hickory.inf
 run:
-	xzip example.z5
+	xzip hickory.z5
 
