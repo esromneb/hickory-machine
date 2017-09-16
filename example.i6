@@ -20,7 +20,7 @@ Include "Grammar";
 
 object InitialRoom "Initial Room"
 with
-description "You are alone in a strange room.",
+description "You are alone in a strange room.  It's lit dimly but you can see a room north.",
 n_to TreasureRoom,
 s_to WoodenDoor,
 has light ;
@@ -29,9 +29,9 @@ has light ;
 
 
 Object -> WoodenDoor "wooden door"
-with description "A big wooden door. It have a lock.", 
+with description "A big wooden door. It has a lock.", 
 name 'big' 'wooden' 'door' ,
-when_closed "You can see a big wooden door, on the south. The door is closed.",
+when_closed "You can see a big wooden door, to the south. The door is closed.",
 when_open "The door is now open.",
 door_to ExitRoom,
 door_dir s_to,
@@ -42,7 +42,7 @@ has static door openable lockable locked ;
 
 object TreasureRoom "Treasure Room"
 with
-description "This room is quite the same as the previous one. You can go to the initial room by walking in the south. There is an other room on the east.",
+description "This room is quite the same as the previous one.  A new room visible to the East.  Your origin is now South of you.",
 s_to InitialRoom,
 e_to DragonRoom,
 has light ;
@@ -50,7 +50,7 @@ has light ;
 
 object DragonRoom "Dragon Room"
 with
-description "You can reach the Treasure room by walking on the west.",
+description "You can reach the Treasure room by walking West.",
 w_to TreasureRoom,
 has light ;
 
@@ -131,12 +131,12 @@ word2 = second;
 if (word1==33) {word1=word2;}
 
 switch (word1) { 
-'hi', 'hello' : "~Hello, stranger.~"; 
-'key', 'help' : "~The exit door is locked. To find the key, you must answer an enigma. If you are ready, I can sing it.~";
+'hi', 'hello' : "~Hello, stranger.~ The dragon snorts a bit of fire out of his nose."; 
+'key', 'help','where','what' : "~The exit door is locked. To find the key, you must answer an riddle. If you are ready, I can sing it.~";
 'hi', 'hello' : "~Hello, stranger.~";
 'door', 'exit', 'lock': "~Hmmm. I can help you to find the key.~";
-'enigma', 'game' , 'song' : "~Here is the enigma : On the morning, it have four legs. At noon, it have two legs; on the night ; it have three. What is it ?~"; 
-'man', 'boy', 'girl', 'human', 'men', 'lady' : print "~You found the solution of the enigma. Congratulations ! The key is inside the golden Chest. Watch out, don't try to open the other one !~^"; EnigmaSolved = true; rtrue ;
+'enigma', 'game' , 'song', 'riddle' : "~Here is the Riddle : In the morning, it has Four legs. At noon, it has Two legs, and at night, it has Three. What is it ?~";
+'man', 'boy', 'girl', 'human', 'men', 'lady','baby','old man' : print "~You solved the Riddle; Congratulations! The key is inside the golden Chest. Watch out, don't try to open the other one !~^"; EnigmaSolved = true; rtrue ;
 'solution' : "You must find the answer by yourself."; 
 default : print "No answer.^"; rtrue;
 }
