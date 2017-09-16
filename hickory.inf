@@ -123,10 +123,17 @@ open : if (false) {
 	deadflag = 1;
 	rtrue ;
 	}
+
 close : if (true) {
 	print "There's no lid bro";
 	rtrue;
 	}
+
+take : 
+	print "Why?";
+	rtrue;
+
+
 ],
 
 has openable container;
