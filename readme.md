@@ -13,3 +13,7 @@ example from: http://www.instructables.com/id/How-to-create-an-Interactive-Ficti
 # examples
 http://ifwiki.org/index.php/Category:Inform_6_tutorials
 
+http://www.ifwiki.org/index.php/Attributes_in_Inform_6
+
+http://www.firthworks.com/roger/informfaq/ww.html
+
