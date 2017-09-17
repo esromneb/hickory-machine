@@ -25,7 +25,7 @@ print "^^^   The following is a fictional tale.^^^^";
 
 
 location = InitialRoom;
-move GoldKey to GoldenChest;
+!move GoldKey to GoldenChest;
 move rubikscube to Tupperware;
 give Tupperware open;
 
@@ -34,15 +34,6 @@ give Tupperware open;
 
 
 Include "Grammar";
-
-
-object InitialRoom "Initial Room"
-with
-description "You are alone in a strange room.  It's lit dimly but you can see a room north.",
-n_to TreasureRoom,
-s_to WoodenDoor,
-has light ;
-
 
 
 
@@ -55,6 +46,16 @@ door_to ExitRoom,
 door_dir s_to,
 with_key goldkey,
 has static door openable lockable locked ;
+
+
+object InitialRoom "Initial Room"
+with
+description "You are alone in a strange room.  It's lit dimly but you can see a room north.",
+n_to TreasureRoom,
+s_to WoodenDoor,
+has light ;
+
+
 
 
 object TreasureRoom "Treasure Room"
@@ -74,37 +75,6 @@ has light ;
 
 
 
-
-
-object SilverChest "Silver Chest"
-with description "A beautiful silver chest.",
-name 'silver' 'chest',
-found_in TreasureRoom,
-
-before [;
-open : print "You open the Silver Chest. A bright light came from the inside. You immedialty feel bad." ;
-deadflag = 1;
-rtrue ; 
-],
-
-has static openable container;
-
-
-
-object GoldenChest "Golden Chest"
-with description "A beautiful Chest, made of Gold.",
-name 'gold' 'golden' 'chest',
-found_in TreasureRoom,
-
-before [;
-open : if (EnigmaSolved == false){
-print "You open the Golden Chest. A bright light came from the inside. You immedialty feel bad." ;
-deadflag = 1;
-rtrue ;
-} 
-],
-
-has static openable container ;
 
 
 
