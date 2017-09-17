@@ -51,7 +51,7 @@ As your perception of the room moves towards the back, you encounter the 'front'
 ",
 
 
-n_to TreasureRoom,
+n_to WhiteRoom,
 s_to BusinessGlassDoor,
 has light ;
 
@@ -79,6 +79,83 @@ Object -> "desk" with
   name "front desk" "desk" "table",
   description "A portable table.",
   has scenery;
+
+
+
+
+
+
+object WhiteRoom "WhiteRoom"
+with
+description "",
+n_to BlackRoom,
+s_to TrapDoor,
+e_to GreenRoom,
+w_to RedRoom,
+
+
+after [;
+    Enter:
+      print "Behind you is a door which will never open";
+      give TrapDoor locked;
+  ],
+
+has light ;
+
+
+Object -> TrapDoor "impossibly strong titanium door"
+with description "A very strong door", 
+name 'door',
+when_closed "",
+when_open "software bug",
+door_to Lobby,
+door_dir s_to,
+with_key impossiblekey1,
+
+has static door openable lockable;
+
+
+
+
+object RedRoom "RedRoom"
+with
+description "",
+e_to GreenRoom,
+n_to BlackRoom,
+s_to Whiteroom,
+has light ;
+
+object GreenRoom "GreenRoom"
+with
+description "",
+w_to RedRoom,
+n_to BlackRoom,
+s_to Whiteroom,
+has light ;
+
+object BlackRoom "BlackRoom"
+with
+description "",
+s_to Whiteroom,
+e_to GreenRoom,
+w_to RedRoom,
+has light ;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

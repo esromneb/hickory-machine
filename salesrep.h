@@ -24,6 +24,8 @@ and then pressing <return> will move you from room to room.  When entering a roo
 look at cube^
 take cube^
 open box^
+^^
+Type ~inv~ which is short for inventory to see what you are carrying.
 
 ^^^
 The room is layed out into 4 rooms arranged in a plus.  There is no center room.
