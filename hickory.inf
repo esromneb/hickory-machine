@@ -87,7 +87,7 @@ Object -> "desk" with
 
 object WhiteRoom "WhiteRoom"
 with
-description "",
+description "The room is white and has x y z pick them up",
 n_to BlackRoom,
 s_to TrapDoor,
 e_to GreenRoom,
@@ -96,9 +96,14 @@ w_to RedRoom,
 
 after [;
     Enter:
-      print "Behind you is a door which will never open";
       give TrapDoor locked;
   ],
+
+initial [;
+    print "The woman pushes you into the room. HARD.^^Behind you a very heavy door slams shut.  You hear a suction noise and realize that the door is also airtight.^^^";
+  ],
+
+
 
 has light ;
 
@@ -113,6 +118,65 @@ door_dir s_to,
 with_key impossiblekey1,
 
 has static door openable lockable;
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! Begin White Room 
+
+
+! User finds a rpi. user
+! The black room is a hidden door IRL and is treated as inaccessable until maybe a 50% story mark
+! The note says:
+!  Youre trapped in a sandbox.  The 
+! 
+!  The goal for the first layer is 3 AA batteires to power the pi.  The pi gives you "shell access"
+!  but you havent escaped yet. you will need to find 3 buffer overflows to deliver. blah.
+!  
+! Three plot points.
+!
+!     a  
+!     b  
+!     c
+!
+! the user escapes the sandbox into the secret room.  now a loud speaker comes on and a recorded message plays
+! from a villian type who says you need to steal the files to escape.  User must steal usb stick and plug in at opposite
+! corner of room. which will trigger a the unlook which is back through the secret exit.
+!
+!
+! 
+!
+!
+!
+!
+
+Object -> "desk" with
+  name "front desk" "desk" "table",
+  description "A portable table.",
+  has scenery;
+
+Object -> "rpi" with
+  name "rpi",
+  powered 1,
+  description "a RPI is here."
+  ;
+
+
+
+Object  -> "flashlight"
+    with  name 'flashlight' 'torch',
+          description "It's a battery-powered flashlight, of the sort that you switch on and off.",
+          after [;
+            SwitchOn:  give self light;
+            SwitchOff: give self ~light;
+          ],
+          when_on "The flashlight provides a faint glimmer.",
+    has   switchable ~on ~light;
+
+
+
+
+
+
+
 
 
 
