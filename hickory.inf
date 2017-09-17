@@ -11,6 +11,8 @@ Constant No_score;
 Global EnigmaSolved = false;
 !Global PuzzleOne = false;
 
+Global ReadyAtLobby = false;
+
 !!!!!!!! End Variables !!!!!!!!
 
 
@@ -136,10 +138,10 @@ has openable container;
 
 
 
-
+! to put a single quote in an objects name we can use ^ 
 object RubiksCube "Rubiks Cube"
 with description "A normal sized Rubiks cube built for speed.",
-name 'cube' 'rubiks' 'rubix',;
+name 'cube' 'rubiks' 'rubik^s' 'rubix',;
 
 
 
