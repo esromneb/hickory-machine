@@ -1,0 +1,1503 @@
+!     The transcript upon which this game is based is copyrighted by
+!     Infocom, 1987.  The rights today belong to Activision, and no
+!     attempts have been made to secure permission from them. From their
+!     track record, they probably don't care about this obscure use of a
+!     by-product of one of their old Infocom games. This certainly can't
+!     be any worse than the Hugo port of Zork.
+! 
+!     This transcript programmed in Inform by Allen Garvin for no
+!     apparent reason (well, actually, he was bored and decided to
+!     program in one of the example transcripts for fun--Beyond Zork's
+!     was the most complete and self-contained); hecan be reached at
+!     earendil@faeryland.tamu-commerce.edu. All code may be freely
+!     distributed and modified, as long as no commercial profit is
+!     involved. It'd be kinda neat if people made full games out of the
+!     transcripts of this or other Infocom games.
+!
+! Note also this is unfinished.  I got bored before I could get around to
+! programming the combat.
+
+Switches xd;
+
+Constant DEBUG;
+Constant SACK_OBJECT = Pack;
+Constant Story "Beyond Zork Example";
+Constant Headline ": An Interactive Transcript^
+Copyright 1987 by Infocom; Inform code copyright 1998 by Allen Garvin^
+Zork is a registered trademark of Activision.^";
+
+Release 1;
+
+Replace DrawStatusLine;
+Replace TimePasses;
+Replace YesOrNo;
+
+Include "/usr/games/Inform/Parser";
+
+Object LibraryMessages with
+  before [;
+    Buy:
+      if( location == Tavern or Shoppe )
+        "Unfortunately, you've already spent your last zorkmid.";
+      rfalse;
+    Quit:
+      QuitRoutine();
+  ],
+;
+
+Array Stats --> 18;
+Array PresetChars --> 36;
+Global AC;
+Global Gender;
+Global MyName;
+
+Include "/usr/games/Inform/VerbLib";
+
+Object Tavern "Tavern" with
+  description "You're in a dark and smoky tavern, filled to capacity with 
+    soldiers, louts, and other misfits like yourself. The ringing of
+    glasses is almost drowned out by the din of drunken voices. An exit
+    lies to the east.",
+  e_to Road,
+  has light;
+
+Object -> "drinks" with
+  name #n$a "drink" "drinks" "glass" "glasses",
+  description "You are the only patron without a glass of sweet liquor.",
+  has scenery;
+
+Object -> "grizzled warrior" with
+  name "warrior" "grizzled" "zot" "brastar" "man",
+  initial [;
+    print "Sitting at a nearby table is a grizzled warrior. ";
+    if( child(self) ) {
+      print "He's holding ";
+      WriteListFrom(child(self), ENGLISH_BIT);
+      ".";
+    }
+    "";
+  ],
+  player_standing [;
+      if( parent(player) == Tavern ) {
+        self.number = self.number + 1;
+        switch( self.number ) {
+          1: "~Sit down, sonny!~";
+          2: "~I ain't talking to no man that can't sit down like a 
+	      gentleman.~";
+          default: 
+	    if( self has general ) print "Zot"; else print (The) self; 
+            " ignores you.";
+        }
+      }
+      self.number = 0;
+      rfalse;
+  ],
+  before [;
+    GreetPerson:
+      if( self.player_standing() ) rtrue;
+      if( self has general )
+        "Zot gives you a friendly nod.";
+      self.greet();
+  ],
+  greet [;
+    if( self has general )
+      "~I've already told you about myself.~";
+    give self general;
+    move Replica to self;
+    "~Zot Brastar's the name!~ roars the warrior, clasping your
+     hand in an iron grip. He reaches under the table and reveals a
+     bright, round object. It's just what you've been looking for - a
+     glow-in-the-dark plastic replica of the legendary Stone of Dreams!";
+  ],
+  life [;
+    Ask:
+      if( self.player_standing() ) rtrue;
+      switch( second ) {
+        'warrior', 'himself', 'grizzled', 'zot', 'brastar':
+           self.greet(); rtrue;
+        'replica', 'stone', 'dreams':
+	  "~Nice little trinket, eh? The dragon I stole it from thought so, 
+	   too.~";
+        default: "~I don't know nothing about that.~";
+      }
+      rfalse;
+    Tell:
+      if( self.player_standing() ) rtrue;
+      rfalse;
+    Order:
+      if( self.player_standing() ) rtrue;
+      rfalse;
+    Give:
+      switch( noun ) {
+        Egg:
+          move Egg to self;
+          "You give the egg to the warrior. ~Hey, thanks!~ he says.";
+        Wand:
+          if( self has general ) print "Zot"; else print (The) self;
+          " refuses your offer.  ~I never could make magic work,~ he
+	   says.  ~That's why I took up the sword for my trade.~";
+        default:
+          if( self has general ) print "Zot"; else print (The) self;
+          " refuses your offer.";
+      }
+  ],
+  orders [;
+    Greet:
+      if( self has general )
+        "Zot gives you a friendly nod.";
+      self.greet();
+      rtrue;
+    Give:
+      if( noun == Replica && second == player ) {
+        if( Egg in self )
+	  "~Oh, this thing? Sure, you can have it. But first, there's this
+	   grue's fang I've been hankering after...~";
+        "~Not so fast, boy!~ chuckles Zot, leaning closer. ~You can have the 
+	 stone - if you bring me the egg of the Queen Corbie.~";
+      }
+    NotUnderstood: 
+      switch( random(3) ) {
+        1: "~You're not making sense, sonny.~";
+        2: "~Speak clearly, boy.~";
+        3: if( self has general ) print "Zot"; else print (The) self;
+           " looks at your puzzled.";
+      }
+    default: if( self.player_standing() ) rtrue;
+  ],
+  number 0,
+  has static animate male transparent;
+
+Object -> "table" with
+  name "table",
+  after [;
+    Enter: 
+      if( self has general ) "~Welcome back, sonny!~";
+      give self general; "You sit down at the table.";
+  ],
+  has scenery supporter enterable;
+
+Object Replica "glow-in-the-dark plastic replica of the legendary 
+    Stone of Dreams" with
+  name "replica" "of" "stone" "dreams" "dream" "glow-in-the-dark" "legendary"
+	"plastic",
+  description "It is exactly the item you need.",
+;
+Object Road "Road" with
+  description "You're standing on a dirt road outside the tavern. A Magick 
+    Shoppe stands to the east, and a dark alley leads north. Looking south, 
+    you see the snowy peaks of a distant mountain.",
+  w_to Tavern,
+  n_to Alley,
+  e_to MDoor,
+  s_to MountainBase,
+  has light;
+
+Object -> "magick shoppe" with
+  name "magick" "shoppe" "shop" "store" "magic",
+  description "Little can be seen from here.",
+  has scenery;
+
+Object Alley "Alley" with
+  description "You're in a dark alley with exits to the south and west. 
+    Unpleasant aromas waft from heaps of garbage.",
+  s_to Road,
+  w_to Alley2,
+  has light;
+
+Object -> Imp "trash imp" with
+  name "trash" "imp" "monster",
+  initial "A trash imp is grinning at you maliciously.",
+  react_before [;
+    Go: 
+      if( noun == w_to ) "The trash imp blocks your path! ";
+  ],
+  has static animate;
+
+Object Alley2 "Alley" with
+  description "You're in a dirty alley, with an exit to the east.",
+  e_to Alley,
+  has light;
+
+Object -> "jagged hole" with
+  name "hole" "jagged",
+  description "It is about five inches wide, but you can't tell how deep
+    it is or what may be in it.",
+  initial "A jagged hole is visible in the sidewalk.",
+  before [;
+    Search: "You see only darkness.";
+    ReachIn: if( Wand hasnt moved ) {
+        move wand to player;
+        give wand moved;
+        "You grasp a thin piece of wood and pull it out. It looks like a 
+         magic wand!";
+      }
+  ],
+  has static container open;
+
+Object -> -> Wand "wand" with
+  name "wand" "magic" "zorch",
+  description [;
+    if( self has general )
+      "You recall that the old woman said it was a Zorch wand.";
+    "It is a short wand, about 8 inches long and made of wood.";
+  ],
+  before [;
+    Point:
+      if( self.number == 0 ) "Nothing happens.";
+      self.number = self.number - 1;
+      switch( second ) {
+        Greech:
+          remove Greech;
+          "POOF! The greech turns into an iguana, and scurries out sight.";
+        Corbie:
+          move Gila to MountainBase;
+          remove Corbie;
+          "POOF! The corbie turns into a large gila monster, scurries out 
+	   of the nest and tumbles out of sight.";
+        default:
+	  "POOF! There is a flash and a cloud of smoke.  Nothing else seems
+	   to have changed.";
+      }
+  ],
+  number 9,
+;
+
+Object MDoor "door" with
+  name "door",
+  found_in Shoppe Road,
+ ! description [;
+ !   print "It looks as if the door is 
+  door_dir [;
+    if( location == Shoppe ) return w_to; return e_to;
+  ],
+  door_to [;
+    if( location == Shoppe ) return Road; return Shoppe;
+  ],
+  before [;
+    Knock:
+      if( door has open ) "It's already open.";
+      if( location == Road )
+        "A voice calls from inside, ~Come in!~";
+  ],
+  after [;
+    Open, Close: 
+      print "As you ";
+      if( action_to_be == ##Open ) print "open"; else print "close";
+      " the door, a concealed bell tinkles merrily.";
+  ],
+  has door openable scenery;
+
+Object Shoppe "Magick Shoppe" with
+  description "You're in Ye Olde Magick Shoppe.  Shelves groan with 
+    forbidden books, bubbling potions, and other fun items.",
+  w_to [;
+    print "~Please try our new Partay spell, with a money-back guarantee!~^";
+    return MDoor;
+  ],
+  has light;
+
+Object -> "old woman" with
+  name "woman" "old",
+  initial "An old woman is standing behind the counter.",
+  description "The old woman regards you with equal interest.",
+  life [;
+    Show, Give:
+      switch( noun ) {
+        Wand:
+          if( Wand has general )
+            "~I've already told you about the Zorch wand.~";
+	  give Wand general;
+	  "The old woman takes the wand and turns it over in her
+	   hands. ~Hmm,~ she says, ~a rare magic item, indeed! This
+	   is a Zorch wand, which can transform any creature into a
+	   reptile. Please be careful - it's not a toy.~^She hands the
+	   wand back to you.";
+        default:
+	  "The old woman glances at ", (the) noun, ". ~Can't tell you much
+	   about this here,~ she mutters.";
+      }
+    Attack, ThrowAt: 
+      "The old woman obviously means you no harm; even your meager
+       compassion is enough to stay your hand.";
+    Ask:
+      "The old woman smiles wryly, but says nothing.";
+    Order: 
+      "~I'm not used to being ordered about,~ observes the old woman 
+       coldly.";
+
+  ],
+  has animate static female;
+
+Object MountainBase "Mountain Base" with
+  description "You're at the bottom of a huge mountain.  A steep, rocky path 
+    leads upwards. Open areas lie to the west and east.",
+  n_to Road,
+  e_to Pasture,
+  w_to Garden,
+  u_to [;
+    if( player in Greech )
+      return Ledge;
+    "You try to scramble up the path, but it's much too steep.";
+  ],
+  has light;
+
+Object Pasture "Pasture" with
+  description "You are standing in a wide, green field of grass.",
+  w_to MountainBase
+  has light;
+
+Object -> Greech "greech" with
+  name "greech" "mountain" "animal",
+  initial [;
+    if( self hasnt general )
+      "A bored-looking mountain greech is feeding in the tall grass.";
+    print_ret "A ", (name) self, " is here, looking at you happily.";
+  ],
+  number 0, ! number of times we've ridden
+  before [;
+    Enter:
+      if( self hasnt general )
+        "The greech trots away from you, and pulls up another clump of grass.";
+    Pet: 
+      if( self hasnt general )
+        "The greech sniffs your fingers, decides they are not worth eating,
+	 and mouths another clump of grass.";
+      "The greech seems to enjoy your attention, looking happily up at your
+       face.";
+    Go:
+      if( location == MountainBase && noun == u_to )
+        "The greech walks up the path with ease, climbing confidently over 
+	 the rocks.";
+      if( (location == Garden or Pasture) ||
+          (location == MountainBase && noun ~= n_to) )
+        "The greech trots across the grass.";
+      if( location == Ledge && noun == u_to ) {
+        print "The greech shakes his head, refusing to climb any higher.^";
+        return 2;
+      }
+      if( location == Ledge && noun == d_to ) {
+        print "The greech picks its way down the slope. ";
+        if( parent(Egg) == player ) {
+          remove Egg;
+          move Scrambled to MountainBase;
+          "About half way down, however, the greech's hoof slips on a rock,
+	   jolting you and sending the egg tumbling from your hand onto the
+	   ground below, shatting as it crashes into the rocks.";
+        }
+        "";
+      }
+      if( location == Road && noun == w_to ) {
+        print "A passing constable growls, ~No greeches allowed in the 
+	  tavern.~^";
+        return 2;
+      }
+      if( location == Road && noun == e_to ) {
+        print "As you start ride the Greech into the Magick Shoppe, the old 
+         woman points at a previously unseen sign by door, ~No Animals 
+	 allowed in Shoppe~.  You turn the greech around.^";
+        return 2;
+      }
+      if( location == Road && noun == n_to ) {
+        print "The greech apparently doesn't like the look of the filthy
+	  alley, and refuses to budge towards it.";
+        return 2;
+      }
+      "The greech carries you along, walking steadily.";
+  ],
+  life [;
+    Give:
+      if( noun == BlueTulip ) {
+        remove noun;
+        give self general;
+	"The greech's eyes light up when it sees the blue tulip. It grabs
+	 it out of your hand, gobbles it down, and gives you a hopeful bleat.";
+      }
+      print_ret (The) self, " sniffs ", (the) noun, " but doesn't consider
+        it worth eating.";
+  ],
+  after [;
+    Enter:
+      if( self.number == 0 ) {
+        self.number = 1;
+        "The greech reluctantly allows you to climb onto its back.^";
+      }
+      "The greech allows you to climb onto his back.";
+  ],
+  has static animate supporter enterable;
+
+Object Garden "Garden" with
+  description [;
+    print "You're standing in a lovely garden, surrounded by exotic flowers. ";
+    if( RedTulip has scenery && BlueTulip has scenery )
+      "A red tulip and a blue tulip are growing at your feet.";
+    if( RedTulip has scenery )
+      "A red tulip is growing at your feet.";
+    if( BlueTulip has scenery )
+      "A blue tulip is growing at your feet.";
+    "";
+  ],
+  e_to MountainBase,
+  has light;
+
+Object -> BlueTulip "blue tulip" with
+  name "blue" "tulip" "flower",
+  before [;
+    Pull, Take:
+      if( self has scenery ) {
+        give self ~scenery;
+        move self to player;
+        print_ret (The) self, " pulls out of the ground with a muffled ~pop.~";
+      }
+  ],
+  has scenery;
+
+Object -> RedTulip "red tulip" with
+  name "red" "tulip" "flower",
+  before [;
+    Pull, Take:
+      if( self has scenery ) {
+        give self ~scenery;
+        move self to player;
+        print_ret (The) self, " pulls out of the ground with a muffled ~pop.~";
+      }
+  ],
+  has scenery;
+
+Object Ledge "Ledge" with
+  description "You're on a narrow ledge near the top of the mountain. A 
+    path leads downward.  About ten feet above you is the peak, which 
+    appears to be covered with straw.",
+  u_to Nest,
+  d_to [;
+    if( player in Greech ) return MountainBase;
+    print "As you climb down the path, you trip and fall! You slide down 
+      to the bottom unhurt, ";
+    if( parent(Egg) == player ) {
+      remove Egg;
+      move Scrambled to MountainBase;
+      print "but the egg falls from your hand and shatters on the ground.^";
+    }
+    if( parent(Egg) == Pack ) {
+      remove Egg;
+      move Scrambled to Pack;
+      print "thanks to your pack which you fell on.  Unfortunately, you heard a
+       crunching sound as you landed on it.^";
+    }
+    print "miraculously.^";
+    return MountainBase;
+  ],
+
+
+  has light;
+
+Object Nest "Nest" with
+  description "You're in a huge straw nest, lined with brightly-colored 
+    string and the skeletons of small, unfortunate animals.",
+  d_to Ledge,
+  before [;
+    Take:
+      if( noun == Egg ) {
+        if( Corbie in location )
+          "There's a giant Queen Corbie looming over you that seems intent
+	   on preventing your theft.";
+        if( Gila notin MountainBase ) {
+          move Corbie to location;
+          "As you reach for the egg, you hear a terrible squawking from 
+	   above, and a pair of talons zooms out of the sky! The Queen 
+	   Corbie lands in the nest and screams at you, her eyes red with 
+	   anger.";
+        }
+      }
+   
+  ],
+  has light;
+
+Object -> Egg "giant purple egg" with
+  initial "A giant purple egg lies in the middle of the nest.",
+  name "egg" "purple" "giant",
+;
+
+Object Scrambled "scrambled egg" with
+  name "scrambled" "egg",
+  description "It is a scrambled egg of herculean proportions.",
+  after [;
+    Eat: "You manage to choke down the uncooked scrambled egg.";
+  ],
+  has edible;
+
+Object Corbie "Queen Corbie" with
+  name "corbie" "queen" "bird" "monster",
+  has animate static;
+
+Object Gila "large but dead gila monster" with
+  name "dead" "reptile" "lizard" "gila" "monster" "large" "but",
+  before [;
+    Take, Remove, Push, Transfer: 
+     "You strain, but cannot even move the dead gila monster, which
+      must weigh several hundred pounds.";
+  ],
+  has static;
+
+Object Sword "sword" with
+  name "sword" "blade" "elvish",
+  description "It's of elvish workmanship.",
+;
+
+Object Pack "pack" with
+  name "pack" "backpack" "back" "leather",
+  description "It is a worn but sturdy leather backpack that has accompanied
+    you on all your journeys.",
+  has container open worn clothing;
+
+Array printed_text table 800;
+
+! I added the printf from the designer's manual, but didn't find it very
+! useful, so I changed it into this :)
+[ FormatText format j k;
+  printed_text-->0 = 64; @output_stream 3 printed_text;
+  print (string) format; @output_stream -3;
+  j = printed_text-->0;
+  for( k=2: k<j+2: k++ ) {
+    if( printed_text->k == '%' ) {
+      switch( printed_text->(++k) ) {
+        '%': print "%";
+        ' ': spaces 1;
+        'B': style bold;
+        'P': style roman; ! Plain
+        'R': style reverse;
+        'U': style underline;
+      }
+    } else
+      print (char) printed_text->k;
+  }
+];
+
+Include "/usr/games/Inform/Grammar";
+
+Global ScreenWidth;
+Global ScreenHeight;
+
+[ Strlen text;
+  printed_text-->0 = 64; @output_stream 3 printed_text;
+  print (string) text; @output_stream -3;
+  return printed_text-->0;
+];
+
+[ FunnyChar text i;
+  printed_text-->0 = 64; @output_stream 3 printed_text;
+  print (string) text; @output_stream -3;
+  for( i=2: i<printed_text-->0: i++ )
+    if(~~( (printed_text->i >= 'A' || printed_text->i <= 'Z') ||
+           (printed_text->i >= 'a' || printed_text->i <= 'z') ||
+           printed_text->i == '-' ) )
+      rtrue;
+  rfalse;
+];
+
+[ Center text stylecode x;
+  x = ScreenWidth/2 - Strlen(text)/2;
+  spaces x;
+  switch( stylecode ) {
+    1: style reverse;
+    2: style bold;
+  }
+  FormatText(text); 
+  if( stylecode ~= 0 ) style roman;
+  new_line;
+];
+
+[ PrintBanner x y;
+  @erase_window -1;
+  for( y=0: y<ScreenHeight / 2 - 4: y++ )
+    print "^";
+  style bold;
+  Center("B E Y O N D    Z O R K"); 
+  style roman;
+  Center("Example Transcript"); new_line;
+  Center("An Interactive Fantasy Simulation"); 
+  Center("Text (c)1987 by Infocom.");
+  Center("Program by Allen Garvin, 1998");
+  @read_char 1 -> x;
+  @erase_window -1;
+];
+
+[ SexSetup i;
+  print "^Shall your character be male or female?^^[The default is MALE.] >";
+  for( :: ) {
+    read buffer parse;
+    i=parse-->1;
+    if( (i=='m//' or 'male') || parse->1 == 0 ) {
+      Gender = 0;
+      return;
+    } else if( i=='f//' or 'female' ) {
+      Gender = 1;
+      return;
+    } else
+      print "^[Please type MALE or FEMALE.]^^[The default is MALE.] >";
+  }
+];
+
+[ YesOrNo i;
+  if( i )
+    print "^[Please type YES or NO.] >";
+  for (::) {
+      read buffer parse;
+
+      i=parse-->1;
+      if (i==YES1__WD or YES2__WD or YES3__WD) rtrue;
+      if (i==NO1__WD or NO2__WD or NO3__WD) rfalse;
+      print "^[Please type YES or NO.] >";
+  }
+];
+
+
+[ QuitRoutine;
+  print "^Are you sure you want to leave the story now?^";
+  if( YesOrNo(1) )
+    quit;
+  else
+    print "^[Continuing.]^^";
+];
+
+[ PrintNum num with_zeros digits;
+  if( digits >= 3 )
+    if( num < 100 )
+      if( with_zeros )
+        print "0";
+      else
+        print " ";
+  if( digits >= 2 )
+    if( num < 10 )
+      if( with_zeros )
+        print "0";
+      else
+        print " ";
+  print num;
+];
+
+[ DisplayStats i j;
+  
+  @set_window 1;
+  style reverse;
+  @set_cursor 3 28;
+  spaces 18; 
+  for( i=0: i<6: i++ ) {
+    j = i + 4;
+    style reverse;
+    @set_cursor j 28;
+    switch( i ) {
+      0: FormatText("    Endurance ");
+      1: FormatText("     Strength ");
+      2: FormatText("    Dexterity ");
+      3: FormatText(" Intelligence ");
+      4: FormatText("   Compassion ");
+      5: FormatText("         Luck ");
+    }
+    style roman; PrintNum(Stats-->i, 0, 3);
+    style reverse; print " ";
+  }
+  @set_cursor 10 28; spaces 18;
+  style roman;
+];
+
+[ AttributeQuery;
+  @erase_window 1;
+  @set_window 1;
+  DisplayStats();
+  @set_window 0;
+  print "^^Are you sure these are the attributes you want?^";
+  return YesOrNo(1);
+];
+
+[ RandomCharLoop i j lp;
+  @erase_window 1;
+
+  while( true ) {
+    for( i=0: i<6: i++ )
+      Stats-->i = 1;
+    for( i=0: i<60: i++ ) {
+      j = random(6) - 1;
+      Stats-->j = Stats-->j + 1;
+    }
+    DisplayStats();
+    @set_window 0;
+    lp = true;
+    while( lp == true ) {
+      @read_char 1 -> i;
+      switch( i ) {
+        32: lp = false;
+        13: if( AttributeQuery() ) rtrue; rfalse;
+
+      }
+    }
+  }
+];
+
+[ PresetCharLoop pos i y lp;
+  @erase_window 1;
+  while( true ) {
+    @set_window 1;
+    style reverse;
+    @set_cursor 3 18;
+    spaces 9; 
+    for( i=0: i<6: i++ ) {
+      y = 4 + i;
+      @set_cursor y 18;
+      print " ";
+      if( pos == i )
+        style roman;
+      switch( i ) {
+        0: FormatText("Lucky  "); 
+        1: FormatText("Tank   ");
+        2: FormatText("Muscles");
+        3: FormatText("Nimble ");
+        4: FormatText("Genius ");
+        5: FormatText("Saint  ");
+      }
+      style reverse;
+      print " ";
+    }
+    @set_cursor 10 18;
+    style reverse; spaces 9; style roman;
+    for( i=0: i<6: i++ )
+      Stats-->i = PresetChars-->(pos * 6 + i);
+
+    DisplayStats();
+    @set_window 0;
+    lp = true;
+    while( lp == true ) {
+      @read_char 1 -> i;
+      switch( i ) {
+        32: lp = false;
+        13: if( AttributeQuery() ) rtrue; rfalse;
+        129: if( pos == 0 ) pos = 5; else pos = pos - 1; lp = false;
+        130, 32: if( pos == 5 ) pos = 0; else pos = pos + 1; lp = false;
+
+      }
+    }
+  }
+];
+
+[ CreateChar lp i j pos pot;
+  
+  @erase_window 1;
+  pot = 60;
+  while( true ) {
+    @set_window 1;
+    style reverse;
+    @set_cursor 3 28;
+    spaces 18;
+    for( i=0: i<6: i++ ) {
+      j = i + 4;
+      style reverse;
+      @set_cursor j 28; print " ";
+      if( pos == i ) style roman;
+      switch( i ) {
+        0: FormatText("   Endurance");
+        1: FormatText("    Strength");
+        2: FormatText("   Dexterity");
+        3: FormatText("Intelligence");
+        4: FormatText("  Compassion");
+        5: FormatText("        Luck");
+      }
+      style reverse; print " ";
+      style roman; PrintNum(Stats-->i, 0, 3);
+      style reverse; print " ";
+    }
+    @set_cursor 10 28; spaces 18;
+    @set_cursor 11 28; FormatText("    Potential ");
+    style roman; PrintNum(pot, 0, 3); style reverse; print " ";
+    @set_cursor 12 28; spaces 18;
+
+    @set_window 0;
+    lp = true;
+    style roman;
+    while( lp == true ) {
+      @read_char 1 -> i;
+      switch( i ) {
+        32: lp = false;
+        13: 
+             if( pot > 0 ) {
+               j = pot / 6;
+               if( j == 0 ) j = 1; 
+               for( i=0: i<5: i++ ) {
+                 if( pot > 0 ) {
+                   Stats-->i = Stats-->i + j;
+                   pot = pot - j;
+                 }
+               }
+               Stats-->5 = Stats-->5 + pot;
+               print "^^Your unused Potential has been evenly distributed.^";
+             }
+             if( AttributeQuery() ) rtrue; rfalse;
+        129: if( pos == 0 ) pos = 5; else pos = pos - 1; lp = false;
+        130, 32: if( pos == 5 ) pos = 0; else pos = pos + 1; lp = false;
+          
+        131: !left
+             if( Stats-->pos > 1 ) {
+               (Stats-->pos)--;
+               pot++;
+               lp = false;
+             }
+        132: !right
+             if( pot > 0 ) {
+               (Stats-->pos)++;
+               pot--;
+               lp = false;
+             }
+      }
+    }
+  }
+];
+
+Global FallThru;
+
+[ SetupLoop pos ch i;
+  @set_cursor 7 0;
+  while( true ) {
+    if( pos == -1 ) {
+      @set_window 1;
+      @set_cursor 5 0;
+      Center("Character Setup");
+      @set_window 0;
+      print "Use the UP and DOWN arrow keys to highlight your selection.^^";
+      print "Type [RETURN] to continue. >";
+      pos = 0;
+    }
+    @set_window 1;
+    for( i=7: i<12: i++ ) {
+      if( pos == i-7 ) ch = 1; else ch = 0;
+      @set_cursor i 0;
+      switch( i ) {
+        7: Center(" Begin using a preset character    ", ch);
+        8: Center(" Select a preset character         ", ch);
+        9: Center(" Randomly generate a new character ", ch);
+        10: Center(" Create your own character         ", ch);
+        11: Center(" Quit                              ", ch);
+      }
+    }
+    !@set_cursor 19 29;
+    @set_window 0;
+    @read_char 1 -> ch;
+    switch( ch ) {
+      129: if( pos == 0 ) pos = 4; else pos = pos - 1;
+      130, 32: if( pos == 4 ) pos = 0; else pos = pos + 1;
+      13: 
+        if( pos == 0 ) {
+          for( i=0: i<6: i++ )
+            Stats-->i = PresetChars-->i;
+          FallThru = 1;
+          return;
+        }
+	if( pos == 1 ) {
+          print "^^Use the UP and DOWN arrow keys to select the character 
+		 you want.^^Press [RETURN] when you're finished. >";
+          if( PresetCharLoop() ) return;
+          pos = -1;
+          @erase_window 1;
+        }          
+        if( pos == 2 ) { 
+	  print "^^A new set of attributes will appear each time you press 
+                 the [SPACE] bar.^^
+                 Press [RETURN] to select a set that you like. >";
+          if( RandomCharLoop() ) return;
+          pos = -1;
+          @erase_window 1;
+        }
+        if( pos == 3 ) {
+          print "^^Use the UP and DOWN arrow keys to select an attribute. 
+                 Then use the LEFT and RIGHT arrow keys to adjust that 
+                 attribute.^^Press [RETURN] when you're finished. >";
+          if( CreateChar() ) return;
+          pos = -1;
+          @erase_window 1;
+        }
+        if( pos == 4 ) { new_line; QuitRoutine(); pos = -1; }
+    }
+  }
+];
+
+[ CharacterSetup;
+  @erase_window -1;
+  @split_window 16;
+  @set_window 1;
+  @set_cursor 5 0;
+  Center("Character Setup");
+                      
+  new_line;
+  Center(" Begin using a preset character    ");
+  Center(" Select a preset character         ");
+  Center(" Randomly generate a new character ");
+  Center(" Create your own character         ");
+  Center(" Quit                              ");
+  @set_window 0;
+  SetupLoop(-1);
+];
+
+[ SetupPreset;
+  PresetChars-->0 = 16; !Lucky
+  PresetChars-->1 = 8;
+  PresetChars-->2 = 8;
+  PresetChars-->3 = 8;
+  PresetChars-->4 = 1;
+  PresetChars-->5 = 25;
+
+  PresetChars-->6 = 30; !Tank
+  PresetChars-->7 = 16;
+  PresetChars-->8 = 8;
+  PresetChars-->9 = 1;
+  PresetChars-->10 = 1;
+  PresetChars-->11 = 10;
+
+  PresetChars-->12 = 18; !Muscles
+  PresetChars-->13 = 20;
+  PresetChars-->14 = 18;
+  PresetChars-->15 = 4;
+  PresetChars-->16 = 1;
+  PresetChars-->17 = 5;
+
+  PresetChars-->18 = 12; !Nimble
+  PresetChars-->19 = 14;
+  PresetChars-->20 = 20;
+  PresetChars-->21 = 4;
+  PresetChars-->22 = 1;
+  PresetChars-->23 = 15;
+
+  PresetChars-->24 = 12; !Genius
+  PresetChars-->25 = 10;
+  PresetChars-->26 = 8;
+  PresetChars-->27 = 16;
+  PresetChars-->28 = 5;
+  PresetChars-->29 = 15;
+
+  PresetChars-->30 = 12; !Saint
+  PresetChars-->31 = 10;
+  PresetChars-->32 = 8;
+  PresetChars-->33 = 8;
+  PresetChars-->34 = 16;
+  PresetChars-->35 = 12;
+];
+
+[ SelectName;
+  if( true ) rfalse;
+  while( true ) {
+    if( Strlen(MyName) > 24 )
+      print "^That name is too long. Please supply another.^";
+    else if( FunnyChar(MyName) )
+      print "^That name is silly. Please supply another.^";
+  }
+];
+     
+[ StartUp i;
+  CharacterSetup();
+  for( i=6:i<12:i++ )
+    Stats-->i = Stats-->(i-6);
+  if( FallThru == 0 ) {
+    SexSetup();
+    SelectName();
+  }
+];
+
+[ CharacterVerify;
+  print "^Are you sure ", (string) MyName, " is the character you want?^";
+  return YesOrNo(1);
+];
+
+[ Initialise i;
+
+  ScreenWidth = 0->33;
+  ScreenHeight = 0->32;
+  for( i=0:i<18:i++ ) {
+    if( i < 6 )
+      Stats-->i = 1;
+    else
+      Stats-->i = 0;
+  }
+  SetupPreset();
+  PrintBanner(); 
+
+
+  
+  do {
+    MyName = "Frank Booth";
+    Startup();
+  } until ( FallThru || CharacterVerify() );
+
+  print "^^Press any key to begin the story. >";
+  @read_char 1 -> i;
+  @erase_window -1;
+  print "^^^";
+  location = Tavern;
+  move Sword to player;
+  move Pack to player;
+];
+
+[ NotifyStat ndex change orig last;
+  style bold;
+  print "^[Your ";
+  switch( ndex ) {
+    0: print "endurance"; 
+    1: print "strength";
+    2: print "dexterity";
+    3: print "intelligence";
+    4: print "compassion";
+    5: print "luck";
+  }
+  print " just went ";
+  if( last + change == orig )
+    print "is back to normal";
+  else if( change < 0 )
+    print "down";
+  else
+    print "up";
+  print ".]^";
+  style roman;
+];
+
+[ TimePasses i;
+  for( i=0: i<6: i++ ) {
+    if( Stats-->(i + 12) ~= 0 ) {
+      NotifyStat(i, Stats-->(i+12), Stats-->i, Stats-->(i+7));
+      Stats-->(i+6) = Stats-->(i+6) + Stats-->(i+12);
+      Stats-->(i+12) = 0;
+      if( Stats-->(i+6) > Stats-->i )
+        Stats-->(i+6) = Stats-->i;
+    }
+  }
+];
+
+[ DrawStatusLine x i;
+  @split_window 2;
+  @set_window 1;
+  @set_cursor 1 1;
+  style reverse;
+  spaces ScreenWidth; new_line; spaces ScreenWidth;
+  @set_cursor 1 2;
+  print (string) MyName;
+
+  x = ScreenWidth - 41;
+  @set_cursor 1 x;
+
+  for( i=0: i<=6: i++ ) {
+    switch( i ) {
+     0: print "EN"; 1: print "ST"; 2: print "DX"; 3: print "IQ";
+     4: print "CM"; 5: print "LK";  6: print "AC";
+    }
+    print ":";
+    if( i == 6 )
+      PrintNum(AC, 1, 2);
+    else
+      PrintNum(Stats-->(i+6), 1, 2);
+    print " ";
+  }
+
+  @set_cursor 2 2;
+  print (name) location;
+  @set_cursor 1 1;
+  style roman;
+  @set_window 0;
+];
+
+[ HelpMenu;
+  switch( menu_item ) {
+    0: item_width = 7; item_name = "About This Game";
+       return 4;
+    1: item_width = 6; item_name = "Instructions";
+    2: item_width = 9; item_name = "Original Transcript";
+    3: item_width = 10; item_name = "Credits and Copyright";
+    4: item_width = 7; item_name = "The IF-Archive";
+  }
+];
+
+[ HelpInfo;
+  switch( menu_item ) {
+    1: print "Instructions will go here.^^";
+        FormatText("%BNote:%P Some older, non-Frotzian interpreters have 
+           some trouble with the full screen character setup.  My apologies.
+           I was too lazy to bother with trying them out and fixing up
+           special routines for them.  I used Frotz 2.32 under Unix with
+           ncurses.^");
+    2: print "^Tavern^
+	You're in a dark and smoky tavern, filled to capacity with soldiers,
+	louts, and other misfits like yourself. The ringing of glasses is 
+	almost drowned out by the din of drunken voices. An exit lies to the
+	east.^
+	Sitting at a nearby table is a grizzled warrior.^^
+
+	>BUY A DRINK^
+	Unfortunately, you've already spent your last zorkmid.^^
+
+	>WARRIOR, HELLO^
+	~Sit down, sonny!~^
+	^
+	>SIT DOWN^
+	You sit down at the table.^
+	^
+	>WARRIOR, WHO ARE YOU?^~
+	~Zot Brastar's the name!~ roars the warrior, clasping your
+	hand in an iron grip. He reaches under the table and reveals a
+	bright, round object. It's just what you've been looking for - a
+	glow-in-the-dark plastic replica of the legendary Stone of Dreams!^^";
+
+      print ">ASK ZOT ABOUT THE REPLICA^
+~Nice little trinket, eh? The dragon I stole it from thought so, too.~^
+^
+>ZOT, GIVE IT TO ME^
+~Not so fast, boy!~ chuckles Zot, leaning closer. ~You can have the stone -
+if you bring me the egg of the Queen Corbie.~^^
+
+>STAND UP^
+You are back on your feet.^
+^
+>GO EAST^
+You leave the tavern, gasping for fresh air.^
+^
+Road^
+You're standing on a dirt road outside the tavern. A Magick Shoppe stands
+to the east, and a dark alley leads north. Looking south, you see the
+snowy peaks of a distant mountain.^^
+
+>INVENTORY [in Beyond Zork, many commands can be shortened using the
+function keys. For example, function key 2 is preset to INVENTORY.]^
+You are carrying a sword.  You are wearing a pack.^^
+
+>NAME THE SWORD ~RALPH~^
+You invoke the Spell of Naming, and the sword basks in the glow of a
+new-forged synonym. Henceforth, you may refer to it as ~Ralph.~^^";
+
+    print ">WIELD RALPH^
+You are now wielding Ralph.^
+^
+Alley^
+You're in a dark alley with exits to the south and west. Unpleasant aromas
+waft from heaps of garbage.^
+A trash imp is grinning at you maliciously.^
+^
+>W^
+The trash imp blocks your path! With a wicked laugh, the trash imp jabs
+you with his fork.^
+[Your endurance just went down.]^^
+
+>ATTACK THE TRASH IMP^
+[with Ralph]^
+Ralph noticeably wounds the trash imp.^
+The trash imp barely grazes you with his fork.^^
+
+>PARRY^
+You leap to avoid the trash imp's fork.^
+The trash imp strikes out at you, but misses.^
+^
+>THRUST^
+You deal the trash imp a decisive blow with Ralph!^
+The trash imp disintegrates into a pile of garbage.^
+[Your experience just went up.]^
+^
+>WEST^
+Alley^
+You're in a dirty alley, with an exit to the east.^
+A jagged hole is visible in the sidewall.^
+^
+>LOOK INTO THE HOLE^
+You see only darkness.^
+^
+>REACH INTO THE HOLE^
+You grasp a thin piece of wood and pull it out. It looks like a magic wand!^
+^
+>E THEN S^
+Alley^
+Road^
+^
+>EAST^
+Magick Shoppe^";
+  print "You're in Ye Olde Magick Shoppe.  Shelves groan with forbidden books,
+bubbling potions, and other fun items.  An old woman is standing behind
+the counter.^^
+
+>SHOW THE WAND TO THE OLD WOMAN^
+The old woman takes the wand and turns it over in her hands. ~Hmm,~ she
+says, ~a rare magic item, indeed! This is a Zorch wand, which can transform
+any creature into a reptile. Please be careful - it's not a toy.~^
+She hands the wand back to you.^^
+
+>WEST^
+~Please try our new Partay spell, with a money-back guarantee!~^
+^
+Road^
+^
+>SOUTH^
+Mountain Base^";
+
+  print "You're at the bottom of a huge mountain.  A steep, rocky path leads
+upwards. Open areas lie to the west and east.^^
+
+>UP^
+You try to scramble up the path, but it's much too steep.^
+^
+>EAST^
+Pasture^
+You are standing in a wide, green field of grass.^
+A bored-looking mountain greech is feeding in the tall grass.^
+^
+>RIDE THE GREECH^
+The greech trots away from you, and pulls up another clump of grass.^
+^
+>PET IT^
+The greech sniffs your fingers, decides they are not worth eating,
+and mouths another clump of grass.^^
+
+>FEED THE GREECH^
+You have nothing to feed the greech.^
+^
+>DROP THE SWORD^
+Dropped.^
+^
+>POINT THE MAGIC WAND AT THE GREECH^
+POOF! The greech turns into an iguana, and scurries out sight.^
+^
+>UNDO^
+Pasture^
+You are standing in a wide, green field of grass.^
+A bored-looking mountain greech is feeding in the tall grass.^
+Ralph is here.^
+^
+>TAKE THE SWORD^
+Taken.^
+^
+>WEST^
+Mountain Base^
+^
+>WEST^
+Garden^";
+print "You're standing in a lovely garden, surrounded by exotic flowers.
+A red tulip and a blue tulip are growing at your feet.^
+^
+>PICK TULIP ^
+[which tulip do you mean, the red tulip or the blue tulip?]^
+^
+>BLUE^
+The blue tulip pulls out of the ground with a muffled ~pop.~^
+Mountain Base^
+Pasture^
+A bored-looking mountain greech is feeding in the tall grass.^
+^
+>FEED THE TULIP TO THE GREECH^
+The greech's eyes light up when it sees the blue tulip. It grabs
+it out of your hand, gobbles it down, and gives you a hopeful bleat.^^
+
+>RIDE THE GREECH^
+The greech reluctantly allows you to climb onto its back.^
+^
+>W^
+The greech trots across the grass.^
+Mountain Base, on a greech^
+^
+>NAME GREECH ~ZEKE~^";
+print "You invoke the Spell of Naming, and the greech basks in the glow
+of a new-forged synonym. Henceforth, you may refer to it as ~Zeke.~^^
+
+>UP^
+Zeke walks up the path with ease, climbing confidently over the rocks.^
+^
+Ledge, on Zeke^
+You're on a narrow ledge near the top of the mountain. A path leads
+downward.  About ten feet above you is the peak, which appears to be
+covered with straw.^^
+
+>UP^
+Zeke shakes his head, refusing to climb any higher. ^
+^
+>GET OFF^
+[Zeke]^
+You are back on your feet.^
+^
+>UP^
+Nest^
+You're in a huge straw nest, lined with brightly-colored string and
+the skeletons of small, unfortunate animals.  A giant purple egg lies
+in the middle of the nest.^^
+
+>TAKE THE EGG^
+As you reach for the egg, you hear a terrible squawking from above, and a pair
+of talons zooms out of the sky! The Queen Corbie lands in the nest and
+screams at you, her eyes red with anger.^^";
+  print ">ATTACK COSBIE^
+[The word ~cosbie~ isn't in the vocabulary you can use.]^
+^
+>OOPS CORBIE ^
+You swing at the Queen Corbie with Ralph, but she flutters out of reach!^
+The corbie lashes out with her razor-sharp beak. Ouch!^
+[Your endurance just went down.]^
+^
+>POINT WAND AT CORBIE^
+POOF! The corbie turns into a large gila monster, scurries out of the
+nest and tumbles out of sight.^^
+
+>GET EGG^
+Taken.^
+^
+>DOWN^
+Ledge^
+Zeke is here, looking at you happily.^
+^
+>DOWN^";
+  print "As you climb down the path, you trip and fall! You slide down to the
+bottom unhurt, but the egg falls from your hand and shatters on the ground.^^
+
+Mountain Base^
+You see a large but dead gila monster and a scrambled egg here.^
+^
+>UNDO^
+Ledge^
+Zeke is here, looking at you happily.^
+^
+>INVENTORY^
+You are carrying Ralph, a giant purple egg and a wand. You are wearing a pack.^
+^
+>PUT THE EGG IN THE PACK^
+You put the giant purple egg in the pack.^
+^
+>RIDE ZEKE^
+Zeke allows You to climb onto his back.^
+^
+>DOWN^
+Zeke picks its way down the slope.^
+^
+Mountain Base, on Zeke^
+You see a large but dead gila monster here.^
+^
+>N.W^
+Zeke carries you along, walking steadily.^
+^
+Road, on Zeke^
+A passing constable growls, ~No greeches allowed in the tavern.~^
+^
+>GET OFF ZEKE^
+You are back on your feet.^
+^
+>W^
+Tavern^";
+  print "A grizzled warrior sits at a nearby table.  He's holding a glow-in-the-dark
+plastic replica of the legendary Stone of Dreams.^^
+
+>SIT DOWN^
+~Welcome back, sonny!~^
+^
+>GIVE THE EGG TO ZOT^
+You'll have to take the egg out of the pack first.^
+^
+>TAKE THE EGG^
+You take the giant purple egg out of the pack.^
+^
+>GIVE THE EGG TO THE WARRIOR^
+You give the egg to the warrior. ~Hey, thanks!~ he says.^
+^
+>WARRIOR, GIVE ME THE PLASTIC STONE^
+~Oh, this thing? Sure, you can have it. But first, there's this
+grue's fang I've been hankering after...~^^";
+FormatText("                               %B[END OF TRANSCRIPT]%P^^");
+
+    3: 
+       FormatText("The transcript upon which this game is based is 
+	 copyrighted by %BInfocom%P, 1987.  The rights today belong
+	 to %BActivision%P, and no attempts have been made to secure
+	 permission from them.	From their track record, they probably
+	 don't care about this obscure use of a by-product of one of
+	 their old Infocom games.  This certainly can't be any worse
+	 than the %BHugo%P port of Zork.^^");
+       FormatText("This transcript programmed in %BInform%P by Allen Garvin for
+	 no apparent reason (well, actually, he was bored and decided to
+         program in one of the example transcripts for fun--%BBeyond Zork%P's
+	 was the most complete and self-contained); he can be reached at 
+	 %Bearendil@@64faeryland.tamu-commerce.edu%P.  All code may be freely
+	 distributed and modified, as long as no commercial profit is
+	 involved.  It'd be kinda neat if people made full games out of
+	 the transcripts of this or other Infocom games.^^");
+    4: FormatText("There is an archive of Interactive Fiction at
+        %Bftp.gmd.de%P, in the directory /if-archive, maintained by Volker
+        Blasius and open to anonymous %BFTP%P.  This repository contains
+        adventure games for almost every computer platform, as well as
+        %BInform%P, the compiler that was used to write this game.^^");
+  }
+];
+
+[ HelpSub;
+  DoMenu("There is information provided on the following:^
+          ^     Instructions
+          ^     Original Transcript
+          ^     Credits and Copyright Information
+          ^     The IF-Archive at FTP.GMD.DE^", HelpMenu, HelpInfo);
+
+];
+
+[ ReachInSub;
+  if( noun hasnt container )
+    "You can't reach into that.";
+  if( noun hasnt open )
+    print_ret (The) noun, " is not open.";
+  if( child(noun) )
+    "There is something inside ", (the) noun, ".";
+  "You reach around inside ", (the) noun, " but feel nothing.";
+];
+
+[ PointSub;
+  "You point ", (the) noun, " at ", (the) second, ", but nothing unusual
+   happens.";
+];
+  
+[ SitDownSub x;
+  objectloop( x in location ) {
+    if( x has supporter && x has enterable )
+      << Enter x >>;
+  }
+  "There is no place to sit here.";
+];
+
+[ PetSub; print_ret (The) noun, " wouldn't appreciate that."; ];
+
+[ SlaverSub; "Leave the slavering to the grues."; ];
+
+[ GreetSub; "Hello to you, too."; ];
+
+[ GreetPersonSub; "There is no response."; ];
+
+[ XyzzySub; "A hollow voice says, ~Fool!~"; ];
+
+[ MagicSpellSub; "Such magic lies far beyond your meager abilities."; ];
+
+[ KnockSub; "There's no answer."; ];
+Verb "reach"
+		* "in"/"into" noun		-> ReachIn;
+
+Verb "point"
+		* held "at" noun		-> Point;
+
+Extend "sit" replace
+		*        			-> SitDown
+		* "at"/"on" noun		-> Enter
+		* "down" 			-> SitDown
+		* "down" "at" noun		-> Enter;
+
+Verb "pet" "pat"
+		* creature			-> Pet;
+
+Verb "slaver" "drool"
+		* 				-> Slaver
+		* "on"/"onto"			-> Slaver;
+		
+Verb "greet" "hi" "hello" "salute" "greetings" 
+		*				-> Greet
+		* creature			-> GreetPerson;
+
+Verb "help" "hints" "hint"
+		* 				-> Help;
+
+Verb "xyzzy"
+		*				-> Xyzzy;
+
+Verb "frotz"
+		* noun				-> MagicSpell;
+
+Verb "knock"	
+		* noun				-> Attack
+		* "on" noun			-> Knock;
+
