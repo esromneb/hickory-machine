@@ -1,6 +1,7 @@
-Constant Story "Hickory";
-Constant Headline "^Remember, You payed to be here, and it wasn't exactly cheap^";
+! vars initalized up here but actually print out below
 
+Constant Story "Hickory";
+Constant Headline "^^^^^^^^^^";  ! goes below title of game
 Constant No_score;
 
 
@@ -12,15 +13,23 @@ Global EnigmaSolved = false;
 
 !!!!!!!! End Variables !!!!!!!!
 
+
+!!!!!!!! Code !!!!!!!!
 #Include "Parser";
 #Include "VerbLib";
 
+
+! main() entry point of game code
 [Initialise;
-print "^^This is a demo game written in Inform 6. Can you solve it ?^^";
+print "^^^   The following is a fictional tale.^^^^";
+
+
 location = InitialRoom;
 move GoldKey to GoldenChest;
 move rubikscube to Tupperware;
 give Tupperware open;
+
+
 ];
 
 

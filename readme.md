@@ -11,6 +11,9 @@ example from: http://www.instructables.com/id/How-to-create-an-Interactive-Ficti
 
 
 # examples
+# best one by far
+http://www.firthworks.com/roger/informfaq/dd.html
+
 http://ifwiki.org/index.php/Category:Inform_6_tutorials
 
 http://www.ifwiki.org/index.php/Attributes_in_Inform_6
