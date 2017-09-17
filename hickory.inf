@@ -21,7 +21,7 @@ Global EnigmaSolved = false;
 
 ! main() entry point of game code
 [Initialise;
-print "^^^   The following is a fictional tale.^^^^";
+print "^^^   The following is a fictional tale.^^^^If you don't know what to do type this:^^  say hello^^^";
 
 
 location = Lobby;
@@ -44,7 +44,7 @@ Include "Grammar";
 object Lobby "Lobby"
 with
 description "You are alone in a well lit lobby.  The first half of the room is open and has a few chairs lining either wall.^^
-As your perception of the room moves towards the back, you encounter the 'front' desk.  Better described as a somewhat shakey three-fold easy assembly table.  A friendly woman stands behind.
+As your perception of the room moves towards the back, you encounter the 'front' desk; Better described as a somewhat shakey three-fold easy assembly table.  A friendly woman stands behind it.
 
 ",
 
@@ -57,7 +57,7 @@ has light ;
 
 Object -> BusinessGlassDoor "glass door"
 with description "An aluminum frame encases a large pane of glass.  There is a push bar and a sign that says push.  Outside you see a busy two way street with cars lining either side.  You should redirect your focus elsewhere.", 
-name 'big' 'wooden' 'door' ,
+name 'door' 'glass' 'front' ,
 when_closed "Behind you is the entrance door to the establishment.",
 when_open "The door is now open.",
 door_to ExitRoom,
@@ -65,6 +65,18 @@ door_dir s_to,
 with_key impossiblekey1,
 has static door openable lockable locked;
 
+
+
+Object -> "chairs" with
+  name "chair" "chairs",
+  description "Individual sackable metal chairs with blue upholstery line the walls.  There are 3 on the left and 2 on the right.",
+  has scenery;
+
+
+Object -> "desk" with
+  name "front desk" "desk" "table",
+  description "A portable table.",
+  has scenery;
 
 
 
@@ -150,7 +162,7 @@ print "You are free ! Congratulation, you solved this game !^^"; deadflag = 2; r
 has light ;
 
 
-
+#Include "salesrep";
 
 
 Object dragon "dragon"
@@ -170,12 +182,14 @@ word2 = second;
 if (word1==33) {word1=word2;}
 
 switch (word1) { 
-'hi', 'hello' : "~Hello, stranger.~ The dragon snorts a bit of fire out of his nose."; 
+
+'hi', 'hello', 'escuse me' : "Hello and welcome";
+
 'key', 'help','where','what' : "~The exit door is locked. To find the key, you must answer an riddle. If you are ready, I can sing it.~";
 'hi', 'hello' : "~Hello, stranger.~";
 'door', 'exit', 'lock': "~Hmmm. I can help you to find the key.~";
 'enigma', 'game' , 'song', 'riddle' : "~Here is the Riddle : In the morning, it has Four legs. At noon, it has Two legs, and at night, it has Three. What is it ?~";
-'man', 'boy', 'girl', 'human', 'men', 'lady','baby','old man' : print "~You solved the Riddle; Congratulations! The key is inside the golden Chest. Watch out, don't try to open the other one !~^"; EnigmaSolved = true; rtrue ;
+'enigma' : print "~You solved the Riddle; Congratulations! The key is inside the golden Chest. Watch out, don't try to open the other one !~^"; EnigmaSolved = true; rtrue ;
 'solution' : "You must find the answer by yourself."; 
 default : print "No answer.^"; rtrue;
 }
