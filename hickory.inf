@@ -1,6 +1,6 @@
 ! vars initalized up here but actually print out below
 
-Constant Story "Hickory";
+Constant Story "Codename Hickory";
 Constant Headline "^^^^^^^^^^";  ! goes below title of game
 Constant No_score;
 
@@ -24,7 +24,7 @@ Global EnigmaSolved = false;
 print "^^^   The following is a fictional tale.^^^^";
 
 
-location = InitialRoom;
+location = Lobby;
 !move GoldKey to GoldenChest;
 move rubikscube to Tupperware;
 give Tupperware open;
@@ -36,24 +36,34 @@ give Tupperware open;
 Include "Grammar";
 
 
+! waiting to take your The business is called 'Sandbox Escape Room'^^newline blah.
 
-Object -> WoodenDoor "wooden door"
-with description "A big wooden door. It has a lock.", 
+
+!!!! rooms
+
+object Lobby "Lobby"
+with
+description "You are alone in a well lit lobby.  The first half of the room is open and has a few chairs lining either wall.^^
+As your perception of the room moves towards the back, you encounter the 'front' desk.  Better described as a somewhat shakey three-fold easy assembly table.  A friendly woman stands behind.
+
+",
+
+
+n_to TreasureRoom,
+s_to BusinessGlassDoor,
+has light ;
+
+
+
+Object -> BusinessGlassDoor "glass door"
+with description "An aluminum frame encases a large pane of glass.  There is a push bar and a sign that says push.  Outside you see a busy two way street with cars lining either side.  You should redirect your focus elsewhere.", 
 name 'big' 'wooden' 'door' ,
-when_closed "You can see a big wooden door, to the south. The door is closed.",
+when_closed "Behind you is the entrance door to the establishment.",
 when_open "The door is now open.",
 door_to ExitRoom,
 door_dir s_to,
-with_key goldkey,
-has static door openable lockable locked ;
-
-
-object InitialRoom "Initial Room"
-with
-description "You are alone in a strange room.  It's lit dimly but you can see a room north.",
-n_to TreasureRoom,
-s_to WoodenDoor,
-has light ;
+with_key impossiblekey1,
+has static door openable lockable locked;
 
 
 
@@ -73,7 +83,7 @@ w_to TreasureRoom,
 has light ;
 
 
-
+object InitialRoom "delme" with desription "delme2" has light;
 
 
 
@@ -88,12 +98,6 @@ object Tupperware "Tupperware brand Tupperware."
 with description "It has seen better days.  It's the size that is meant for a single sandwitch and I don't need to tell you that the lid is missing",
 name 'tupperware',
 found_in InitialRoom,
-
-!before [;
-!open : print "You open the Silver Chest. A bright light came from the inside. You immedialty feel bad." ;
-!deadflag = 1;
-!rtrue ; 
-!],
 
 
 before [;
@@ -121,16 +125,6 @@ has openable container;
 
 
 
-
-
-
-
-
-
-
-
-
-
 object RubiksCube "Rubiks Cube"
 with description "A normal sized Rubiks cube built for speed.",
 name 'cube' 'rubiks' 'rubix',;
@@ -138,6 +132,7 @@ name 'cube' 'rubiks' 'rubix',;
 
 
 
+object impossiblekey1 "dev key 1";
 
 object Goldkey "golden key"
 with description "A small golden key.",
