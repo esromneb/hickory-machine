@@ -38,9 +38,9 @@ say ready
 ";
 'ready' : print "Ok lets go.  type north to enter."; ReadyAtLobby = true; rtrue ;
 'hi', 'hello' : "~Hello, stranger.~";
-'door', 'exit', 'lock': "~Hmmm. I can help you to find the key.~";
 'enigma' : print "~You solved the Riddle; Congratulations! The key is inside the golden Chest. Watch out, don't try to open the other one !~^"; EnigmaSolved = true; rtrue ;
-'solution' : "You must find the answer by yourself."; 
+'fuck', 'shit' : "~Please don't swear.~";
+'bathroom' : "~The bathroom is for employees only, you'll just have to hold it~";
 default : print "No answer.^"; rtrue;
 }
 
