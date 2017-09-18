@@ -159,6 +159,11 @@ Object -> "rpi" with
   description "a RPI is here."
   ;
 
+Object -> "Brown Box" with
+  name "Brown Box",
+  description "A sturdy wooden brown box.";
+
+
 
 
 Object  -> "flashlight"
