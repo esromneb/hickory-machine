@@ -30,8 +30,11 @@ location = Lobby;
 !move GoldKey to GoldenChest;
 move rubikscube to Tupperware;
 move BenNickKey to Lobby;
+
+! This is what foces the tupperware open
 give Tupperware open;
 
+move candle to Coffin;
 
 ];
 
@@ -200,6 +203,26 @@ n_to BlackRoom,
 s_to Whiteroom,
 has light ;
 
+object candle "candle"
+with
+name "candle",
+description "candle stick unburned lies here";
+
+
+object Coffin "coffin"
+with
+name "coffin",
+description "in the corner lies a coffin.",
+found_in RedRoom,
+has static container openable;
+
+object Note "Note"
+with
+name "note" "paper",
+description "You find yourself trapped.  Much like the following rildle you will need to think harder.    the man who built it doesnt want it the man who bought doesnt need it the man who needs it doesnt know it.",
+found_in RedRoom
+;
+
 object GreenRoom "GreenRoom"
 with
 description "",
@@ -267,12 +290,7 @@ found_in InitialRoom,
 
 
 before [;
-open : if (false) {
-	print "You open the Golden Chest. A bright light came from the inside. You immedialty feel bad." ;
-	deadflag = 1;
-	rtrue ;
-	}
-
+open : 
 close : if (true) {
 	print "There's no lid bro";
 	rtrue;
@@ -281,7 +299,6 @@ close : if (true) {
 take : 
 	print "Why?";
 	rtrue;
-
 
 ],
 
