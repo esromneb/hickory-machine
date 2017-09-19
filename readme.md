@@ -22,7 +22,9 @@ http://ifwiki.org/index.php/Category:Inform_6_tutorials
 http://www.ifwiki.org/index.php/Attributes_in_Inform_6
 
 http://www.firthworks.com/roger/informfaq/ww.html
-
+http://www.firthworks.com/roger/informfaq/ll.html
+http://www.firthworks.com/roger/informfaq/oo.html
+http://www.firthworks.com/roger/informfaq/ii.html
 
 
 # Docker on mac notes:

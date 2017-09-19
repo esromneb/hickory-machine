@@ -31,7 +31,7 @@ location = Lobby;
 move rubikscube to Tupperware;
 move BenNickKey to Lobby;
 
-! This is what foces the tupperware open
+! This is what forces the tupperware open
 give Tupperware open;
 
 move candle to Coffin;
@@ -286,7 +286,7 @@ object InitialRoom "delme" with desription "delme2" has light;
 object Tupperware "Tupperware brand Tupperware."
 with description "It has seen better days.  It's the size that is meant for a single sandwitch and I don't need to tell you that the lid is missing",
 name 'tupperware',
-found_in InitialRoom,
+found_in GreenRoom,
 
 
 before [;
