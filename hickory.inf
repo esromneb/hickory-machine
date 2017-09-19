@@ -29,6 +29,7 @@ print "^^^   The following is a fictional tale.^^^^If you don't know what to do 
 location = Lobby;
 !move GoldKey to GoldenChest;
 move rubikscube to Tupperware;
+move BenNickKey to Lobby;
 give Tupperware open;
 
 
@@ -54,6 +55,11 @@ As your perception of the room moves towards the back, you encounter the 'front'
 n_to WhiteRoom,
 s_to BusinessGlassDoor,
 has light ;
+
+Object -> BenNickKey "Ben and nicks key",
+with description "a regular key",
+name 'key';
+
 
 
 
@@ -133,9 +139,9 @@ has static door openable lockable;
 !  
 ! Three plot points.
 !
-!     a  
-!     b  
-!     c
+!     a  x
+!     b  y
+!     c  y
 !
 ! the user escapes the sandbox into the secret room.  now a loud speaker comes on and a recorded message plays
 ! from a villian type who says you need to steal the files to escape.  User must steal usb stick and plug in at opposite

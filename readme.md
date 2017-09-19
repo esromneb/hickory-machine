@@ -1,3 +1,6 @@
+#Docker
+installed on mac using version Version 17.06.2-ce-mac27
+
 
 http://inform-fiction.org/inform63/index.html
 
